@@ -11,6 +11,23 @@ stata_dataset = "/home/alvaro/Desktop/MendozaEtAl2023-VC/Data/CROWD_SUSTAINABILI
 df = pd.read_stata(stata_dataset)
 df.drop(index=range(3679,len(df)), inplace=True)
 
+df = df[df["form_c"] ==1]
+# 1,853 investment crowdfunding campaings under the Form C exemption from May 2016 until September 2019
+
+df["deadline"] = pd.to_datetime(df["deadline"])
+df = df[df["deadline"] <= "2019-10-01"]
+# 1,768 investment crowdfunding campaigns
+
+# Table 1: Descriptive statistics
+df[["exito",
+    "quick75relative",
+    "sustainable",
+    "sizemostrecent",
+    "employees",
+    "age",
+    "equity",
+    "asked"]].describe()
+
 # set the locale to the United States
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 # usd = locale.currency(NUMBER, grouping=True)
