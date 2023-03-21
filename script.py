@@ -1,5 +1,8 @@
 import pandas as pd
 import locale
+import numpy as np
+from psmpy import psm
+from scipy import stats
 import matplotlib.pyplot as plt
 import statsmodels.formula.api as smf
 from linearmodels.system import IVSystemGMM
@@ -22,11 +25,79 @@ df = df[df["deadline"] <= "2019-10-01"]
 df[["exito",
     "quick75relative",
     "sustainable",
-    "sizemostrecent",
+    "totalassetsmostrecent",
     "employees",
     "age",
     "equity",
-    "asked"]].describe()
+    "asked",
+    "loglagnum_oper_por_platf_y", # Number of offerings per platform
+    "lagbranches",                 # Bank branches
+    "lagvcfundraising"            # VC fundraising
+    ]].describe()
+# No encuentro Bank Net Income to Total Assets
+
+df_sust = df[df["sustainable"] == 1]
+df_non_sust = df_sust = df[df["sustainable"] == 0]
+
+# calculate t-statistic and p-value for each pair
+data = {
+    "exito": (df_non_sust["exito"],df_sust["exito"]),
+    "quick75relative": (df_non_sust["quick75relative"],df_sust["quick75relative"]),
+    "totalassetsmostrecent": (df_non_sust["totalassetsmostrecent"],df_sust["totalassetsmostrecent"]),
+    "employees": (df_non_sust["employees"],df_sust["employees"]),
+    "age": (df_non_sust["age"],df_sust["age"]),
+    "equity": (df_non_sust["equity"],df_sust["equity"]),
+    "asked": (df_non_sust["asked"],df_sust["asked"]),
+    "loglagnum_oper_por_platf_y": (df_non_sust["loglagnum_oper_por_platf_y"],df_sust["loglagnum_oper_por_platf_y"]),
+    "lagbranches": (df_non_sust["lagbranches"],df_sust["lagbranches"]),
+    "lagvcfundraising": (df_non_sust["lagvcfundraising"],df_sust["lagvcfundraising"]),
+}
+
+results = {}
+
+for key in data:
+    group1 = data[key][0]
+    group2 = data[key][1]
+
+    # calculate t-statistic    
+    t_statistic, p_value = stats.ttest_ind(group1, group2, nan_policy="omit")
+    
+    # Indicate statistical significance at different levels
+    if p_value < 0.01:
+        significance = "***"
+    elif p_value < 0.05:
+        significance = "**"
+    elif p_value < 0.10:
+        significance = "*"
+    else:
+        significance = ""
+        
+    # calculate mean of each variable
+    mean_group1 = np.mean(group1)
+    mean_group2 = np.mean(group2)
+
+    results[key]={'non sustainable':mean_group1,
+                  'sustainable':mean_group2,
+                  't-statistic':t_statistic,
+                  'p-value':p_value,
+                  'significance':significance}
+# Display results
+df_results = pd.DataFrame(results).T
+
+# Propensity score matching
+covariates = ["exito", "quick75relative", "totalassetsmostrecent", "employees", "asked"]
+# caliper 1-to-1
+
+# Calculate t-statistic for mean differences between two groups after matching
+t_statistic,p_value = stats.ttest_ind(matched_data[matched_data['treated']==1]['outcome'],
+                                      matched_data[matched_data['treated']==0]['outcome'])
+
+print(f"t-statistic: {t_statistic}")
+print(f"p-value: {p_value}")
+# nearest 1-to-1
+
+# nn-VBC
+
 
 # set the locale to the United States
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
