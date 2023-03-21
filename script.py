@@ -1,7 +1,7 @@
 import pandas as pd
 import locale
 import numpy as np
-from psmpy import psm
+import psmpy
 from scipy import stats
 import matplotlib.pyplot as plt
 import statsmodels.formula.api as smf
@@ -25,10 +25,10 @@ df = df[df["deadline"] <= "2019-10-01"]
 df[["exito",
     "quick75relative",
     "sustainable",
-    "totalassetsmostrecent",
-    "employees",
-    "age",
-    "equity",
+    "totalassetsmostrecent", # La variable a utilizar a posteriory es "sizemostrecent1"
+    "employees",             # logemployees1
+    "age",                 
+    "equity",                # logasked1
     "asked",
     "loglagnum_oper_por_platf_y", # Number of offerings per platform
     "lagbranches",                 # Bank branches
@@ -37,7 +37,7 @@ df[["exito",
 # No encuentro Bank Net Income to Total Assets
 
 df_sust = df[df["sustainable"] == 1]
-df_non_sust = df_sust = df[df["sustainable"] == 0]
+df_non_sust = df[df["sustainable"] == 0]
 
 # calculate t-statistic and p-value for each pair
 data = {
