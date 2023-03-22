@@ -63,6 +63,7 @@ formula_outcome = f"exito ~ {indep_vars_str}"
 
 model_treatment = smf.probit(formula=formula_treatment, data=df).fit()
 summary_with_stars(smf.probit(formula="sustainable ~ employees + asked + sizemostrecent1", data=df).fit()) 
+summary_with_stars(sm.Probit(df["sustainable"], df[["employees", "asked", "sizemostrecent1","equity"]]).fit())
 
 model_outcome = smf.probit(formula=formula_outcome, data=df).fit()
 summary_with_stars(smf.probit(formula="exito ~ logemployees1 + asked1 + sizemostrecent1", data=df).fit())
