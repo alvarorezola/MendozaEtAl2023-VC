@@ -9,6 +9,21 @@ from linearmodels.system import IVSystemGMM
 from linearmodels.iv import IVGMM
 from linearmodels import PooledOLS, PanelOLS, RandomEffects
 
+def summary_with_stars(model):
+    # get the summary table as a DataFrame
+    summary_df = model.summary2().tables[1]
+
+    # create a new column for stars
+    summary_df['stars'] = ''
+
+    # add stars based on p-values
+    summary_df.loc[summary_df['P>|z|'] < 0.001, 'stars'] = '***'
+    summary_df.loc[(summary_df['P>|z|'] >= 0.001) & (summary_df['P>|z|'] < 0.01), 'stars'] = '**'
+    summary_df.loc[(summary_df['P>|z|'] >= 0.01) & (summary_df['P>|z|'] < 0.05), 'stars'] = '*'
+
+    # return the modified summary table
+    return summary_df
+
 # import data
 stata_dataset = "/home/alvaro/Desktop/MendozaEtAl2023-VC/Data/CROWD_SUSTAINABILITY_FINAL.dta"
 df = pd.read_stata(stata_dataset)
@@ -25,7 +40,7 @@ df = df[df["deadline"] <= "2019-10-01"]
 df[["exito",
     "quick75relative",
     "sustainable",
-    "totalassetsmostrecent", # La variable a utilizar a posteriory es "sizemostrecent1"
+    "totalassetsmostrecent1", # La variable a utilizar a posteriory es "sizemostrecent1"
     "employees",             # logemployees1
     "age",                 
     "equity",                # logasked1
@@ -43,7 +58,7 @@ df_non_sust = df[df["sustainable"] == 0]
 data = {
     "exito": (df_non_sust["exito"],df_sust["exito"]),
     "quick75relative": (df_non_sust["quick75relative"],df_sust["quick75relative"]),
-    "totalassetsmostrecent": (df_non_sust["totalassetsmostrecent"],df_sust["totalassetsmostrecent"]),
+    "totalassetsmostrecent1": (df_non_sust["totalassetsmostrecent1"],df_sust["totalassetsmostrecent1"]),
     "employees": (df_non_sust["employees"],df_sust["employees"]),
     "age": (df_non_sust["age"],df_sust["age"]),
     "equity": (df_non_sust["equity"],df_sust["equity"]),
